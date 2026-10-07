@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulação de phishing | HeadInvest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#102033;
+    --muted:#4E5A68;
+    --rule:#D6DBE1;
+    --band:#EEF1F5;
+    --red:#B42318;
+    --white:#FFFFFF;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--white);color:var(--ink);font:400 17px/1.65 "Source Serif 4",Georgia,serif}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+  h1,h2,h3{font-family:"Archivo",system-ui,sans-serif;margin:0;color:var(--ink)}
+  :focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+  /* barra institucional */
+  .bar{background:var(--ink);color:#fff}
+  .bar .wrap{display:flex;align-items:center;gap:14px;height:56px;font-family:"Archivo",sans-serif}
+  .org{font-weight:700;font-size:17px;letter-spacing:-0.01em}
+  .dept{font-size:14px;color:#AFC0D3;padding-left:14px;border-left:1px solid #3A4B5E}
+
+  /* abertura */
+  .intro{padding-top:64px;padding-bottom:72px}
+  .alert{display:inline-flex;align-items:center;gap:8px;background:#FDECEA;color:var(--red);border:1px solid #F4C3BE;border-radius:4px;
+    padding:7px 13px 7px 10px;font:600 15px/1 "Archivo",sans-serif;margin-bottom:22px}
+  .alert svg{flex:0 0 18px}
+  .intro h1{font-size:clamp(36px,5.2vw,64px);font-weight:600;line-height:1.06;letter-spacing:-0.02em;max-width:18ch}
+  .notice{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:start;margin-top:44px;background:var(--ink);color:#fff;padding:34px 38px;border-radius:4px;max-width:880px}
+  .notice svg{display:block}
+  .notice h2{font-size:clamp(24px,2.6vw,30px);font-weight:600;letter-spacing:-0.01em;color:#fff;margin-bottom:10px}
+  .notice p{margin:0;font-size:19px;line-height:1.6;color:#D8E1EB;max-width:none}
+
+  /* análise */
+  .analysis{background:var(--band);padding:72px 0 80px}
+  .analysis h2{font-size:clamp(26px,3vw,34px);font-weight:600;letter-spacing:-0.015em}
+  .sub{color:var(--muted);margin:10px 0 40px;max-width:60ch}
+  .grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:48px;align-items:start}
+
+  /* reprodução do e-mail no Outlook */
+  .mail{position:relative;margin:0;background:#292929;color:#E6E6E6;border-radius:6px;overflow:hidden;
+    font:400 14.5px/1.55 "Segoe UI",system-ui,-apple-system,sans-serif;box-shadow:0 1px 2px rgba(16,32,51,.15),0 18px 40px -24px rgba(16,32,51,.55)}
+  .m-subject{font-size:20px;color:#fff;padding:18px 22px 12px}
+  .m-head{display:flex;gap:12px;align-items:flex-start;padding:0 22px 14px;border-bottom:1px solid #3A3A3A}
+  .m-avatar{flex:0 0 40px;height:40px;border-radius:50%;background:#8764B8;color:#fff;display:grid;place-items:center;font-size:17px}
+  .m-meta{flex:1;min-width:0}
+  .m-from{color:#F2F2F2}
+  .m-to,.m-date{font-size:12.5px;color:#B3B3B3}
+  .m-to{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .m-date{white-space:nowrap}
+  .fl[data-sign="1"],.fl[data-sign="3"]{white-space:nowrap}
+  .m-body{padding:18px 22px 44px}
+  .m-kicker{color:#C8C8C8;font-weight:600;font-size:15px;margin:0}
+  .m-title{font-size:32px;font-weight:300;color:#6EA6F0;line-height:1.2;margin:2px 0 20px}
+  .m-body p{margin:0 0 16px}
+  .m-link{color:#4FB2F5;text-decoration:underline}
+  .m-btn{display:inline-block;background:#7DA8F0;color:#161616;font:600 14px "Segoe UI",system-ui,sans-serif;padding:8px 20px;border:0;margin:6px 0 20px;cursor:pointer}
+  .m-sign{color:#D0D0D0}
+  .m-status{position:absolute;left:0;bottom:0;max-width:100%;background:#F2F2F2;color:#222;font:12px/1.4 system-ui,sans-serif;padding:3px 9px;border-top-right-radius:3px;
+    opacity:0;transition:opacity .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .m-btn:hover + .m-status,.m-btn:focus + .m-status,.mail.show-url .m-status{opacity:1}
+
+  .fl{background:rgba(249,112,102,.14);box-shadow:inset 0 -2px 0 #F97066;-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:background .15s}
+  .fl.on{background:rgba(249,112,102,.4)}
+  .m-btn.fl{background:#7DA8F0;box-shadow:0 0 0 2px #F97066}
+  .m-btn.fl.on{box-shadow:0 0 0 4px #F97066}
+  .pin{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#E5483C;color:#fff;
+    font:700 11px/1 "Archivo",sans-serif;margin-right:6px;vertical-align:2px;font-style:normal}
+  .m-title .pin{vertical-align:middle}
+  .pin-btn{margin-left:8px;margin-right:0}
+
+  /* lista de sinais */
+  .signs{list-style:none;margin:0;padding:0;border-bottom:1px solid var(--rule)}
+  .signs li{display:grid;grid-template-columns:28px 1fr;gap:16px;padding:18px 0;border-top:1px solid var(--rule)}
+  .num{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--red);color:var(--red);font:700 12.5px/25px "Archivo",sans-serif;text-align:center;transition:background .15s,color .15s}
+  .signs li.on .num{background:var(--red);color:#fff}
+  .signs h3{font-size:17px;font-weight:600;line-height:1.3;margin:2px 0 4px}
+  .signs p{margin:0;font-size:16px;color:var(--muted)}
+  .signs code{font:500 14px "Archivo",sans-serif;color:var(--ink);background:#E2E6EC;padding:1px 5px;border-radius:3px}
+
+  /* como agir */
+  .act{padding-top:72px;padding-bottom:80px}
+  .act h2{font-size:clamp(26px,3vw,34px);font-weight:600;letter-spacing:-0.015em;margin-bottom:36px}
+  .cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 64px}
+  .cols h3{font-size:18px;font-weight:600;margin-bottom:6px}
+  .cols p{margin:0;color:var(--muted);max-width:46ch}
+
+  footer{border-top:1px solid var(--rule)}
+  footer .wrap{padding-top:24px;padding-bottom:36px;font:400 14px/1.5 "Archivo",sans-serif;color:var(--muted)}
+
+  @media (max-width:860px){
+    .intro{padding-top:40px;padding-bottom:52px}
+    .notice{grid-template-columns:1fr;gap:14px;padding:26px 24px;margin-top:32px}
+    .notice p{font-size:17.5px}
+    .analysis{padding:52px 0 60px}
+    .sub{margin-bottom:28px}
+    .grid{grid-template-columns:1fr;gap:32px}
+    .fl[data-sign="1"]{white-space:normal}
+    .m-title{font-size:27px}
+    .m-subject{font-size:18px}
+    .cols{grid-template-columns:1fr;gap:28px}
+    .act{padding-top:52px;padding-bottom:60px}
+    .dept{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap"><span class="org">HeadInvest</span><span class="dept">Segurança da Informação</span></div>
+</header>
+
+<main>
+  <section class="wrap intro">
+
+    <h1>Você caiu em uma campanha de phishing interna.</h1>
+    <div class="notice">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="11" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><circle cx="12" cy="16" r="1.2" fill="#fff"/></svg>
+      <div>
+      <h2>Confidencialidade</h2>
+      <p>A campanha ainda está em andamento e outros colaboradores também estão sendo avaliados. Pedimos que você não comente sobre este teste com colegas até o encerramento, para que os resultados reflitam o comportamento real da equipe.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="analysis">
+    <div class="wrap">
+      <h2>Análise do e-mail que você recebeu</h2>
+      <p class="sub">Cinco sinais indicavam que a mensagem não era legítima. Passe o mouse sobre cada item para localizá-lo no e-mail.</p>
+
+      <div class="grid">
+        <figure class="mail" aria-label="Reprodução do e-mail de simulação">
+          <div class="m-subject">Alerta de segurança da conta Microsoft</div>
+          <div class="m-head">
+            <div class="m-avatar">M</div>
+            <div class="m-meta">
+              <div class="m-from">Microsoft 365 Support <span class="fl" data-sign="1"><i class="pin">1</i>&lt;support@office-365-notifications.com&gt;</span></div>
+              <div class="m-to">Para&nbsp;&nbsp;você<span class="m-date">ter 06/10/2026 11:36</span></div>
+            </div>
+          </div>
+          <div class="m-body">
+            <p class="m-kicker">Conta da Microsoft</p>
+            <div class="m-title"><span class="fl" data-sign="2"><i class="pin">2</i>Alerta de segurança</span></div>
+            <p>Achamos que outra pessoa acessou a conta da <span class="fl" data-sign="3"><i class="pin">3</i><span class="m-link">Microsoftseu.nome@headinvest.com.br</span></span>. Quando isso acontece, exigimos que você <span class="fl" data-sign="4"><i class="pin">4</i>verifique sua identidade com um desafio de segurança e, em seguida, altere sua senha</span> na próxima vez que fizer login.</p>
+            <p>Se outra pessoa tiver acesso à sua conta, ela tem sua senha e pode estar tentando acessar suas informações pessoais ou enviar lixo eletrônico.</p>
+            <p>Se você ainda não recuperou sua conta, podemos ajudá-lo a fazer isso agora.</p>
+            <button class="m-btn fl" data-sign="5" type="button">Recuperar conta<i class="pin pin-btn">5</i></button><span class="m-status">https://login-microsoftonline.authwebmail.com/recuperar?id=8f2c91</span>
+            <p class="m-sign">Obrigada,<br>A equipe de contas da Microsoft</p>
+          </div>
+        </figure>
+
+        <ol class="signs">
+          <li data-sign="1" tabindex="0">
+            <span class="num">1</span>
+            <div><h3>Remetente fora do domínio da Microsoft</h3>
+            <p>O nome exibido é "Microsoft 365 Support", mas o endereço é <code>office-365-notifications.com</code>. O que vale é o que vem depois do @, não o nome.</p></div>
+          </li>
+          <li data-sign="2" tabindex="0">
+            <span class="num">2</span>
+            <div><h3>Alarme para apressar a decisão</h3>
+            <p>"Alerta de segurança" e "outra pessoa acessou a conta" foram escritos para gerar medo e fazer você agir antes de verificar.</p></div>
+          </li>
+          <li data-sign="3" tabindex="0">
+            <span class="num">3</span>
+            <div><h3>Texto montado automaticamente</h3>
+            <p>"Microsoft" colado ao seu endereço de e-mail mostra um modelo preenchido por máquina, sem revisão humana.</p></div>
+          </li>
+          <li data-sign="4" tabindex="0">
+            <span class="num">4</span>
+            <div><h3>Pedido de senha por e-mail</h3>
+            <p>Serviços legítimos não pedem que você confirme identidade ou troque senha por um link recebido. As contas da HeadInvest são administradas pela TI.</p></div>
+          </li>
+          <li data-sign="5" tabindex="0">
+            <span class="num">5</span>
+            <div><h3>Link para um endereço falso</h3>
+            <p>Ao passar o mouse sobre "Recuperar conta", o endereço que aparece termina em <code>authwebmail.com</code>, que não pertence à Microsoft.</p></div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap act">
+    <h2>Como agir daqui em diante</h2>
+    <div class="cols">
+      <div><h3>Não use links de alertas inesperados</h3><p>Acesse o serviço digitando o endereço no navegador ou pelo aplicativo oficial.</p></div>
+      <div><h3>Confira o domínio do remetente</h3><p>Leia com atenção o que vem depois do @. Domínios parecidos com o original são a técnica mais comum.</p></div>
+      <div><h3>Reporte, mesmo na dúvida</h3><p>Use o botão Relatar no Outlook ou encaminhe a mensagem para a equipe de TI.</p></div>
+      <div><h3>Se informou uma senha, aja rápido</h3><p>Em um caso real, troque a senha imediatamente e avise a TI. Agir cedo reduz o dano.</p></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">HeadInvest, Segurança da Informação. Dúvidas sobre esta simulação: fale com a equipe de TI.</div>
+</footer>
+
+<script>
+  // destaca o sinal no e-mail e na lista ao mesmo tempo
+  document.querySelectorAll('[data-sign]').forEach(el => {
+    const id = el.dataset.sign;
+    const set = v => {
+      document.querySelectorAll('[data-sign="' + id + '"]').forEach(x => x.classList.toggle('on', v));
+      if (id === '5') document.querySelector('.mail').classList.toggle('show-url', v);
+    };
+    el.addEventListener('mouseenter', () => set(true));
+    el.addEventListener('mouseleave', () => set(false));
+    el.addEventListener('focus', () => set(true));
+    el.addEventListener('blur', () => set(false));
+  });
+</script>
+</body>
+</html>
